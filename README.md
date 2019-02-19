@@ -40,7 +40,7 @@ on 3/4. This project will be worked on in teams of two or three. Teams will be a
 on February 19th.
 
 **Potential deductions:**
-
+```
 -100 Does not interpret/crashes
 
 -25 Missing data for one or more hashtags
@@ -54,3 +54,5 @@ on February 19th.
 -10 Missing correlation comment
 
 -25 Lack of comments 
+
+```
