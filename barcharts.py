@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[5]:
+# In[1]:
 
 
 import pandas as pd
@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pylab as plt
 import copy
 import datetime
+
+
 import tweepy
 f = open('twitter_tokens.txt','r')
 consumer_key = f.readline().rstrip('\n')
@@ -23,6 +25,7 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)# handshake
 auth.set_access_token(app_key,app_secret) #access to timeline of the account
 
 api = tweepy.API(auth, wait_on_rate_limit=True) #send it all in to get the API object
+
 #reads in csv files and merges the two days for each hashtag
 def mergeDFs(file1,file2):
     temp1 = pd.read_csv(f'{file1}.csv',header=None,names=['ID','Date','User','Followers','RTs','Favorites'])
@@ -128,15 +131,7 @@ print('\n#yolo')
 favorites(yolo)
 
 
-# In[132]:
-
-
-
-foo = datetime.datetime(2019,2,27,6,30,15)
-print(foo)
-
-
-# In[19]:
+# In[5]:
 
 
 #bar charts!
@@ -144,153 +139,83 @@ print(foo)
 #y axis is the number of tweets in that 15-minute time frame. so if there weere 3 yolo tweets between 00:00 and 00:15, then the point would be (00:15,3)
 #Only 1 data point per xtick. 
 
-#test = pd.Interval(pd.Timestamp('2019-02-27 18:00:00'), pd.Timestamp('2019-02-27 23:59:59'), closed = 'left')
-#stem.Date[0] in test
-#d2 = d1 + delta
-#test = stem[stem.Date.between(d1, d2, inclusive=True)]
-#t2 = test[test.Date.between(d1,d1+datetime.datetime(2019))]
-#len(test.index) #this is the number of rows
-
 # so for the first bullet we want len(test.index) to be the value.
-
-#we want 24 values
-#scatter1.append([d2,len(test.index)])
 
 from matplotlib.dates import DateFormatter 
 import matplotlib.dates as mdates
 import matplotlib
 import time
 
+#matplotlib.rcParams['figure.figsize'] = [15, 10]
+
 #constant
 delta = datetime.timedelta(minutes=15) #add this each time youdhssdnfgbbkgnh
 bigdelta = datetime.timedelta(hours=6)
 
 time1 = datetime.datetime(2019, 2, 27, 0,0, 0)
-#time2 = time1 + delta
 
 
 #this is the first chunk. we need 8 of these.
 
 
-def create_axes(d1):
-    global delta
+def create_axes(d1,data):
+    global bigdelta
     merged_data = []
-    d2 = d1+delta
-    for i in range(24):
-        temp = stem[stem.Date.between(d1,d2,inclusive=True)] #should we make inclusive false?
+    d2 = d1 + bigdelta
+    for i in range(8):
+        temp = data[data.Date.between(d1,d2,inclusive=True)] #should we make inclusive false?
 
         #increment the time range by 15 minutes
         d1 = d2
-        d2 += delta
+        d2 += bigdelta
 
         #print(f'At time {d1} we have {len(temp.index)}')
 
         # add the Date(biggest end) and the Number Of Occurences 
-        merged_data.append([d1,len(temp.index)])
+        timestr = str(d1.month)+ '/' +str(d1.day) + ' ' + str(d1.hour) + ':00'
+        merged_data.append([timestr,len(temp.index)])
+        #print(timestr)
     return merged_data
 
-axes1 = create_axes(time1)
-time1 += bigdelta
+axes_stem     = create_axes(time1, stem)
+axes_csforall = create_axes(time1, csforall)
+axes_equality = create_axes(time1, equality)
+axes_yolo     = create_axes(time1, yolo)
 
-axes2 = create_axes(time1)
-time1 += bigdelta
+df_bar_stem     = pd.DataFrame(axes_stem,     columns= ['Date','Frequency'])    
+df_bar_csforall = pd.DataFrame(axes_csforall, columns = ['Date','Frequency'])
+df_bar_equality = pd.DataFrame(axes_equality, columns = ['Date','Frequency'])
+df_bar_yolo     = pd.DataFrame(axes_yolo,     columns = ['Date','Frequency'])
 
-axes3 = create_axes(time1)
-time1 += bigdelta
+#print(df_bar_stem)
 
-axes4 = create_axes(time1)
-time1 += bigdelta
-
-axes5 = create_axes(time1)
-time1 += bigdelta
-
-axes6 = create_axes(time1)
-time1 += bigdelta
-
-axes7 = create_axes(time1)
-time1 += bigdelta
-
-axes8 = create_axes(time1)
-time1 += bigdelta
-
-
-#for i in scatter1:
-    #print(f'{i[0]}\t{i[1]}')
-
-s1 = pd.DataFrame(axes1,columns=['Date','Frequency'])    
-s2 = pd.DataFrame(axes2,columns=['Date','Frequency'])
-s3 = pd.DataFrame(axes3,columns=['Date','Frequency'])
-s4 = pd.DataFrame(axes4,columns=['Date','Frequency'])
-s5 = pd.DataFrame(axes5,columns=['Date','Frequency'])
-s6 = pd.DataFrame(axes6,columns=['Date','Frequency'])
-s7 = pd.DataFrame(axes7,columns=['Date','Frequency'])
-s8 = pd.DataFrame(axes8,columns=['Date','Frequency'])
-
-print(s1, s2, s3, s4, s5, s6, s7, s8)
-
-#s1.plot.scatter('Date','Frequency')
-#plt.scatter(s1.Date, s1.Frequency)
-#plt.xlim(s1.Date[0],s1.Date[len(s1.Date.index)-1])
-#plt.scatter(list(s1.Date.values),list(s1.Frequency.values),color='r')
-#plt.show()
-#fig, ax = plt.subplots()
-
-#plt.plot_date(s1.Date, s1.Frequency, c = 'red')
-
-#formatter = matplotlib.ticker.FuncFormatter(lambda ms, x: time.strftime('%H:%M:%S', time.gmtime(ms // 1000)))
-#plt.show()
-#ax = s1.plot.bar(x='Date', y='Frequency')
-
-#fig, ax = plt.subplots()
-
-
-#plt.style.use('seaborn-pastel')
-
-
-# In[46]:
-
-
-
-fig, axes = plt.subplots(nrows=4, ncols=2)
-
-#df1.plot(ax=axes[0,0])
-#df2.plot(ax=axes[0,1])
 
 import random
 
-s1.plot.bar('Date','Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[0,0])
-s2.plot.bar("Date",'Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[0,1])
+c = (0.4, 0.4, 0.8,0.5)
+c2 = (0.8, 0.4, 0.4,0.5)
+c3 = (0.4, 0.8, 0.4,0.5)
+c4 = (0.4, 0.4, 0.4,0.5)
 
-s3.plot.bar('Date','Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[1,0])
-s4.plot.bar("Date",'Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[1,1])
-
-s5.plot.bar('Date','Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[2,0])
-s6.plot.bar("Date",'Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[2,1])
-
-s7.plot.bar('Date','Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[3,0])
-s8.plot.bar("Date",'Frequency',color=(random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0,0.9), random.uniform(0.4,0.9)),ax=axes[3,1])
-#f, ax = plt.subplots(2,4)
-
-#for i in ([s1, s2, s3, s4, s5, s6, s7, s8]):
-#s1.plot.bar(i['Date'],i['Frequency'],color='blue')
-#fig = plt.figure()
+ax  = df_bar_stem.plot.bar(    'Date', 'Frequency', color = c,  rot=0)
+ax2 = df_bar_csforall.plot.bar('Date', 'Frequency', color = c2, rot=0)
+ax3 = df_bar_equality.plot.bar('Date', 'Frequency', color = c3, rot=0)
+ax4 = df_bar_yolo.plot.bar(    'Date', 'Frequency', color = c4, rot=0)
 
 
+ax.set_ylabel('Frequency')
+ax.set_title("#stem")
+
+ax2.set_ylabel('Frequency')
+ax2.set_title("#csforall")
+
+ax3.set_ylabel('Frequency')
+ax3.set_title("#equality")
+
+ax4.set_ylabel('Frequency')
+ax4.set_title("#yolo")
 
 
-#ax.xaxis.set_major_formatter(fmt)
-#ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%M'))
-#fig.autofmt_xdate()
 
-#plt.xticks(rotation=45,horizontalalignment='right')
-# Pad margins so that markers don't get clipped by the axes
-plt.margins(0.08)
-# Tweak spacing to prevent clipping of tick-labels
-plt.subplots_adjust(top=1,hspace=0.7)
-#matplotlib.rcParams['figure.figsize'] = [30,20]
+
 plt.show()
-
-
-
-    
-
