@@ -197,10 +197,10 @@ c2 = (0.8, 0.4, 0.4,0.5)
 c3 = (0.4, 0.8, 0.4,0.5)
 c4 = (0.4, 0.4, 0.4,0.5)
 
-ax  = df_bar_stem.plot.bar(    'Date', 'Frequency', color = c,  rot=0)
-ax2 = df_bar_csforall.plot.bar('Date', 'Frequency', color = c2, rot=0)
-ax3 = df_bar_equality.plot.bar('Date', 'Frequency', color = c3, rot=0)
-ax4 = df_bar_yolo.plot.bar(    'Date', 'Frequency', color = c4, rot=0)
+ax  = df_bar_stem.plot.bar(    'Date', 'Frequency', color = c,  rot=60)
+ax2 = df_bar_csforall.plot.bar('Date', 'Frequency', color = c2, rot=60)
+ax3 = df_bar_equality.plot.bar('Date', 'Frequency', color = c3, rot=60)
+ax4 = df_bar_yolo.plot.bar(    'Date', 'Frequency', color = c4, rot=60)
 
 
 ax.set_ylabel('Frequency')
