@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Answer this: what shape do you need your data?
-
 # In[1]:
 
 
-import  numpy as np
+# imports
+
 import pandas as pd
-import seaborn as sns
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, Normalizer
-from sklearn.metrics import confusion_matrix
-from patsy import dmatrices, dmatrix
 import matplotlib.pyplot as plt
-from sklearn import datasets
+import warnings
+
+# supress warning (see later)
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 # In[2]:
@@ -63,7 +59,7 @@ yolo["day"] = new[2]
 yolo["time"] = new[3]
 
 
-# In[13]:
+# In[4]:
 
 
 # split tweet time into a more useable format, (separate time column into hours, min, sec; save hours, tens place of min)
@@ -89,10 +85,11 @@ yolo["hour"] = new[0]
 yolo["min"] = new[4]
 
 
-# In[14]:
+# In[5]:
 
 
-# period = day/hour, format: ddhhm
+# period = day/hour/min, format: ddhhm
+# (we've only saved the tens place of the minutes)
 
 csforall['period'] = pd.to_numeric(csforall[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
 equality['period'] = pd.to_numeric(equality[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
@@ -100,7 +97,7 @@ stem['period'] = pd.to_numeric(stem[['day', 'hour','min']].apply(lambda x: ''.jo
 yolo['period'] = pd.to_numeric(yolo[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
 
 
-# In[15]:
+# In[6]:
 
 
 # compile freqencies over 6 hour chunks
@@ -120,14 +117,11 @@ d = {'csforall': csforall['period'].value_counts(),
 frequencies = pd.DataFrame(data=d).fillna(0)
 
 
-# In[16]:
+# In[8]:
 
 
-#frequencies
-
-
-# In[17]:
-
+# Break the frequency count into 6 hour time chunks. Drop the rows it adds for nonexistent time ranges.
+# this is the code that produces the warnings. It doesn't like how values like "27059" don't exist.
 
 chunk1 = frequencies.loc[range(27000,27060)].dropna()
 chunk2 = frequencies.loc[range(27060,27120)].dropna()
@@ -141,33 +135,36 @@ chunk8 = frequencies.loc[range(28180,28240)].dropna()
 chunks = [chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8]
 
 
-# In[21]:
+# In[9]:
 
 
+chunk_index = 1     # for titling the scatterplots
+
+# for each time chunk
 for chunk in chunks:
-    number = 1
-    checklist = []
+    number = 1      # to add subplots to the figures correctly
+    checklist = []  # to make sure we don't redraw identical graphs
+    
+    # Make and title a figure
     fig = plt.figure(figsize=(12,10))
-    fig.subplots_adjust(wspace=0.25, hspace=0.7, left=0.125, right=0.9, top=0.9, bottom=0.1)
-    #title = ('Frequencies in time chunk number ', number)
-    #fig.suptitle(title, fontsize=16)
+    fig.subplots_adjust(wspace=0.25, hspace=0.5, left=0.125, right=0.9, top=0.9, bottom=0.1)
+    title = 'Hashtag Frequencies in Time Chunk ' + str(chunk_index) + ' of 8'
+    fig.suptitle(title, fontsize=16)
+    chunk_index += 1
+    
+    # for each pair of hashtags (duplicates nonwithstanding)
     for hashtag in chunk:
         checklist.append(hashtag)
         for othertag in chunk:
             if othertag not in checklist:
+                # draw a scatterplot comparing their frequencies and add it to the figure
                 ax1 = fig.add_subplot(3,2,number)
-                ax1.scatter(chunk.index, chunk[hashtag], color="blue", marker="o", label = hashtag, alpha = .4)
-                ax1.scatter(chunk.index, chunk[othertag], c='r', marker="s", label= othertag, alpha = .4)
+                ax1.scatter(chunk.index, chunk[hashtag], c="b", marker="o", label = hashtag, alpha = .5)
+                ax1.scatter(chunk.index, chunk[othertag], c='r', marker="s", label = othertag, alpha = .5)
                 plt.legend(loc='upper left');
                 ax1.set_xlabel('time')
-                ax1.set_ylabel('frequency')
+                ax1.set_ylabel('frequency count')
                 number += 1
-    print('')
+    
     plt.show()
-
-
-# In[ ]:
-
-
-
 
