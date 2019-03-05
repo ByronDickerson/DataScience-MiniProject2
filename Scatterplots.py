@@ -63,51 +63,44 @@ yolo["day"] = new[2]
 yolo["time"] = new[3]
 
 
-# In[4]:
+# In[13]:
 
 
-# split tweet time into a more useable format, (separate time column into hours, min, sec; save hours, min)
+# split tweet time into a more useable format, (separate time column into hours, min, sec; save hours, tens place of min)
 
 new = csforall["time"].str.split(":", expand = True) 
+new[4] = [time[0] for time in new[1]]
 csforall["hour"] = new[0]
-#csforall["min"] = pd.to_numeric(new[1])
+csforall["min"] = new[4]
 
 new = equality["time"].str.split(":", expand = True) 
+new[4] = [time[0] for time in new[1]]
 equality["hour"] = new[0]
-#equality["min"] = pd.to_numeric(new[1])
+equality["min"] = new[4]
 
 new = stem["time"].str.split(":", expand = True) 
+new[4] = [time[0] for time in new[1]]
 stem["hour"] = new[0]
-#stem["min"] = pd.to_numeric(new[1])
+stem["min"] = new[4]
 
 new = yolo["time"].str.split(":", expand = True) 
+new[4] = [time[0] for time in new[1]]
 yolo["hour"] = new[0]
-#yolo["min"] = pd.to_numeric(new[1])
+yolo["min"] = new[4]
 
 
-# In[5]:
+# In[14]:
 
 
-# period = day/hour, format: ddhh
+# period = day/hour, format: ddhhm
 
-csforall['period'] = pd.to_numeric(csforall[['day', 'hour']].apply(lambda x: ''.join(x), axis=1))
-equality['period'] = pd.to_numeric(equality[['day', 'hour']].apply(lambda x: ''.join(x), axis=1))
-stem['period'] = pd.to_numeric(stem[['day', 'hour']].apply(lambda x: ''.join(x), axis=1))
-yolo['period'] = pd.to_numeric(yolo[['day', 'hour']].apply(lambda x: ''.join(x), axis=1))
-
-
-# In[6]:
+csforall['period'] = pd.to_numeric(csforall[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
+equality['period'] = pd.to_numeric(equality[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
+stem['period'] = pd.to_numeric(stem[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
+yolo['period'] = pd.to_numeric(yolo[['day', 'hour','min']].apply(lambda x: ''.join(x), axis=1))
 
 
-# drop unneccesary info (only period remains)
-
-csforall.drop(['tweet ID','username','user followers', 'retweets', 'favorites', "time created", 'time', 'day'],inplace=True,axis=1) 
-equality.drop(['tweet ID','username','user followers', 'retweets', 'favorites', "time created", 'time', 'day'],inplace=True,axis=1) 
-stem.drop(['tweet ID','username','user followers', 'retweets', 'favorites', "time created", 'time', 'day'],inplace=True,axis=1) 
-yolo.drop(['tweet ID','username','user followers', 'retweets', 'favorites', "time created", 'time', 'day'],inplace=True,axis=1) 
-
-
-# In[7]:
+# In[15]:
 
 
 # compile freqencies over 6 hour chunks
@@ -127,59 +120,54 @@ d = {'csforall': csforall['period'].value_counts(),
 frequencies = pd.DataFrame(data=d).fillna(0)
 
 
-# In[8]:
+# In[16]:
 
 
-chunk1 = frequencies.loc[range(2700,2706)]
-chunk2 = frequencies.loc[range(2706,2712)]
-chunk3 = frequencies.loc[range(2712,2718)]
-chunk4 = frequencies.loc[range(2718,2724)]
-chunk5 = frequencies.loc[range(2800,2806)]
-chunk6 = frequencies.loc[range(2806,2812)]
-chunk7 = frequencies.loc[range(2812,2818)]
-chunk8 = frequencies.loc[range(2818,2824)]
+#frequencies
+
+
+# In[17]:
+
+
+chunk1 = frequencies.loc[range(27000,27060)].dropna()
+chunk2 = frequencies.loc[range(27060,27120)].dropna()
+chunk3 = frequencies.loc[range(27120,27180)].dropna()
+chunk4 = frequencies.loc[range(27180,27240)].dropna()
+chunk5 = frequencies.loc[range(28000,28060)].dropna()
+chunk6 = frequencies.loc[range(28060,28120)].dropna()
+chunk7 = frequencies.loc[range(28120,28180)].dropna()
+chunk8 = frequencies.loc[range(28180,28240)].dropna()
 
 chunks = [chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7, chunk8]
 
 
-# In[9]:
+# In[21]:
 
 
 for chunk in chunks:
-    fig = plt.figure(figsize=(12,6))
-    fig.subplots_adjust(wspace=0.25, hspace=0.50, left=0.125, right=0.9, top=0.9, bottom=0.1)
-    #title = ('Frequencies in time chunk', chunk)
-    #fig.suptitle(title, fontsize=16)
     number = 1
+    checklist = []
+    fig = plt.figure(figsize=(12,10))
+    fig.subplots_adjust(wspace=0.25, hspace=0.7, left=0.125, right=0.9, top=0.9, bottom=0.1)
+    #title = ('Frequencies in time chunk number ', number)
+    #fig.suptitle(title, fontsize=16)
     for hashtag in chunk:
+        checklist.append(hashtag)
         for othertag in chunk:
-            if hashtag != othertag:
-                ax1 = fig.add_subplot(4,3,number)
-                ax1.scatter(chunk[hashtag], chunk[othertag], color="blue", marker="o", alpha=.4)
-                ax1.set_xlabel(hashtag)
-                ax1.set_ylabel(othertag)
+            if othertag not in checklist:
+                ax1 = fig.add_subplot(3,2,number)
+                ax1.scatter(chunk.index, chunk[hashtag], color="blue", marker="o", label = hashtag, alpha = .4)
+                ax1.scatter(chunk.index, chunk[othertag], c='r', marker="s", label= othertag, alpha = .4)
+                plt.legend(loc='upper left');
+                ax1.set_xlabel('time')
+                ax1.set_ylabel('frequency')
                 number += 1
+    print('')
     plt.show()
 
 
-# In[10]:
+# In[ ]:
 
 
-fig = plt.figure(figsize=(12,6))
 
-fig.subplots_adjust(wspace=0.25, hspace=0.50, left=0.125, right=0.9, top=0.9, bottom=0.1)
-fig.suptitle('Frequencies, Feb 27, 00:00 to 06:00', fontsize=16)
-
-number = 1
-
-for hashtag in chunk1:
-    for othertag in chunk1:
-        if hashtag != othertag:
-            ax1 = fig.add_subplot(4,3,number)
-            ax1.scatter(chunk2[hashtag], chunk2[othertag], color="red", marker="o", alpha=.4)
-            ax1.set_xlabel(hashtag)
-            ax1.set_ylabel(othertag)
-            number += 1
-
-plt.show()
 
